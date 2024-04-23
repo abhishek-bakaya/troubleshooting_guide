@@ -84,7 +84,7 @@ An IPv6 network and a gateway would have been added in the config.
 
 1. Run the installation command.
 ```
-    mirror-registry install --quayHostname installer.cluster.example.com --quayRoot /root/mirror-registry/data --quayStorage </root/mirror-registry/data/quay-storage> --pgStorage /root/registry/data/pg-data --initUser admin --initPassword "password" --sslCert /root/mirror-registry/ssl/ssl.cert --sslKey /root/mirror-registry/ssl/ssl.key
+    mirror-registry install --quayHostname installer.cluster.example.com --quayRoot /root/mirror-registry/data --quayStorage /root/mirror-registry/data/quay-storage --pgStorage /root/registry/data/pg-data --initUser admin --initPassword "password" --sslCert /root/mirror-registry/ssl/ssl.cert --sslKey /root/mirror-registry/ssl/ssl.key
 ```
 
 2. Wait for `/root/mirror-registry/data/quay-config/config.yaml` to generate. Add `FEATURE_LISTEN_IP_VERSION` parameter and set it to `IPv6` or `dual-stack` as per setup.
