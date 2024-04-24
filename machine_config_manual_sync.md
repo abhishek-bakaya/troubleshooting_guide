@@ -7,7 +7,7 @@ Cluster node is showing `machineconfig.machineconfiguration.openshift.io "render
 
 ## Diagnostic Steps
 
-- Check the mcp (MAchineConfigPool). The following message shows that the rendered mc (MachineConfig) used is not found.
+- Check the mcp (MachineConfigPool). The following message shows that the rendered mc (MachineConfig) used is not found.
 ```
 $ oc get mcp
 NAME     CONFIG                 UPDATED   UPDATING   DEGRADED   MACHINECOUNT   READYMACHINECOUNT   UPDATEDMACHINECOUNT   DEGRADEDMACHINECOUNT
@@ -105,4 +105,54 @@ $ oc create -f mymc.yaml
 $ oc get mc | grep rendered-master-47daa0aaf2aac3477b7dcc774945374a
 ```
 
+If the node is degraded, machine-config-operator won't automatically sync the machineConfig to the degraded node. We have to force it to synchronize.
+
+> ***Note: In case of the degraded mcp of master nodes, do not run following commands in all the master nodes simultaneously. After applying the following process on a master node, wait for it to become `Ready`, then continue on the next master node. In case of degraded mcp of worker nodes, you can run these commands simultaneously on all the worker nodes.***
+
+
+4. Login to the node, delete the current machineConfig and create a force file.
+```
+$ oc debug node/master0.cluster.domain
+# chroot /host
+# rm /etc/machine-config-daemon/currentconfig
+# touch /run/machine-config-daemon-force
+# exit
+# exit
+```
+
+
+5. Edit the node annotations.
+
+- By patching.
+```
+$ oc patch node master0.cluster.domain --type merge --patch "{\"metadata\": {\"annotations\": {\"machineconfiguration.openshift.io/currentConfig\": \"rendered-master-47daa0aaf2aac3477b7dcc774945374a\"}}}"
+$ oc patch node master0.cluster.domain --type merge --patch "{\"metadata\": {\"annotations\": {\"machineconfiguration.openshift.io/desiredConfig\": \"rendered-master-47daa0aaf2aac3477b7dcc774945374a\"}}}"
+$ oc patch node master0.cluster.domain --type merge --patch '{"metadata": {"annotations": {"machineconfiguration.openshift.io/reason": ""}}}'
+$ oc patch node master0.cluster.domain --type merge --patch '{"metadata": {"annotations": {"machineconfiguration.openshift.io/state": "Done"}}}'
+```
+
+
+- Manually replace the value of mc with the newly created one, remove the value of `machineconfiguration.openshift.io/reason` annotation and change the value of `machineconfiguration.openshift.io/state` from `Degraded` to `Done`.
+```
+$ oc edit node master0.cluster.domain
+....
+annotations:
+....
+    machineconfiguration.openshift.io/currentConfig: rendered-master-47daa0aaf2aac3477b7dcc774945374a
+    machineconfiguration.openshift.io/desiredConfig: rendered-master-47daa0aaf2aac3477b7dcc774945374a
+    machineconfiguration.openshift.io/desiredDrain: uncordon-rendered-master-47daa0aaf2aac3477b7dcc774945374a
+    machineconfiguration.openshift.io/lastAppliedDrain: uncordon-rendered-master-47daa0aaf2aac3477b7dcc774945374a
+    machineconfiguration.openshift.io/reason: ""
+    machineconfiguration.openshift.io/state: Done
+```
+
+
+Check if the mcp is getting updated. If not, then restart the pods of machine-config-operator.
+```
+$ oc get mcp
+$ oc delete pods -n openshift-machine-config-opertor --all
+```
+
+
+A reboot will be triggered and the node will come back to `Ready` state.
 
