@@ -82,7 +82,7 @@ metadata:
     machineconfiguration.openshift.io/release-image-version: 4.12.30
   creationTimestamp: "2024-04-01T06:59:36Z"    <----- delete this line
   generation: 1                                <----- delete this line
-  name: rendered-master-ee37d00cb0f68430f42c1015fedb8fb5  <----- replace this value with rendered-master-47daa0aaf2aac3477b7dcc774945374a
+  name: rendered-master-55f7c69f13e362ebcff5f90c7085aa2a  <----- replace this value with rendered-master-47daa0aaf2aac3477b7dcc774945374a
   ownerReferences:
   - apiVersion: machineconfiguration.openshift.io/v1
     blockOwnerDeletion: true
