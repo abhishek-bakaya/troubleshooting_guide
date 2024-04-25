@@ -121,7 +121,7 @@ $ oc debug node/master0.cluster.domain
 ```
 
 
-5. Edit the node annotations.
+5. Edit the node annotations. There are two ways, either automatically by patch command or manually by editing the node.
 
 - By patching.
 ```
